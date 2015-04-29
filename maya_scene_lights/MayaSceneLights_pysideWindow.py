@@ -3,7 +3,6 @@ __author__ = 'Carlos Montes'
 ''' Creates the main window layout and widgets'''
 
 from PySide import QtGui, QtCore
-import sys
 import os
 import maya.OpenMaya as OpenMaya
 
@@ -48,12 +47,103 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         main_container = QtGui.QWidget(self)
         self.setCentralWidget(main_container)
 
+        # ===== UTILITY CLOSURES ====
+
+        def add_space(layout, x, y):
+            """
+            Add a spacer in the window's layouts
+            :param layout: Layout where the spacer will be added
+            :param x: Width of spacer
+            :param y: Height of spacer
+            :return: None
+            """
+            spacer = QtGui.QSpacerItem(x, y)
+            layout.addSpacerItem(spacer)
+    
+        def add_line(length):
+            """
+            Return a thick line to add in the layouts
+            :param length: Length of the line
+            :return: QFrame in the form of a line
+            """
+            line = QtGui.QFrame()
+            line.setFixedWidth(length)
+            line.setGeometry(QtCore.QRect(0, 0, length, 0))
+            line.setFrameShape(QtGui.QFrame.HLine)
+            return line
+    
+        def new_button(text, font_size=None):
+            """
+            Returns a new button
+            :param text: Text that the button will contain
+            :param font_size: Optional Font size of the button's text
+            :return: QPushButton
+            """
+            button = QtGui.QPushButton('  ' + text + '  ')
+            button.setStyleSheet("background-color:#555555; color:#CCCCCC;")
+            button.setFixedHeight(25)
+            if font_size is not None:
+                font = QtGui.QFont()
+                font.setPointSize(font_size)
+                button.setFont(font)
+            return button
+    
+        def new_checkbox(text):
+            """
+            Return a new Checkbox
+            :param text: Text that will accompany the checkbox
+            :return: QCheckbox
+            """
+            checkbox = QtGui.QCheckBox(text)
+            checkbox.setStyleSheet('color:#333333;')
+    
+            cb_palette = checkbox.palette()
+            cb_palette.setColor(QtGui.QPalette.Base, QtCore.Qt.gray)
+            checkbox.setPalette(cb_palette)
+    
+            return checkbox
+    
+        def new_label(text, size, color, bold=False):
+            """
+            Return a new QLabel
+            :param text: Text that will be contained by the label
+            :param size: Size of the label's text
+            :param color: Color of the label's text
+            :param bold: Boolean that tells whether to bold the label or not
+            :return: QLabel
+            """
+            label = QtGui.QLabel(text)
+            label.setStyleSheet('color:#%d;' % color)
+            label.setAlignment(QtCore.Qt.AlignCenter)
+            label.setFixedHeight(20)
+    
+            font = QtGui.QFont()
+            font.setPointSize(size)
+            if bold:
+                font.setBold(bold)
+            label.setFont(font)
+            return label
+    
+        def new_line_edit(size, readonly=False):
+            """
+            Return a new QLineEdit with standard styling
+            :param size: Width of the textbox
+            :param readonly: Boolean that tells whether to make it non-modifiable
+            :return:
+            """
+            textbox = QtGui.QLineEdit()
+            textbox.setFixedSize(size, 20)
+            textbox.setStyleSheet('background-color:#444444; border:none; color:#FFFFFF')
+            textbox.setReadOnly(readonly)
+            textbox.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+            return textbox
+
         # ===== LEFT SIDE OF THE WINDOW =====
 
         # Search Textbox (and its Focus Policy) and its label, along with its container layout
         search_layout = QtGui.QHBoxLayout()
-        search_label = self.newLabel('Search Lights:', 7, 333333)
-        self.searchlight_tbox = self.newLineEdit(110)
+        search_label = new_label('Search Lights:', 7, 333333)
+        self.searchlight_tbox = new_line_edit(110)
         self.searchlight_tbox.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         # Widget List that will hold the light names in the scene, and its container layout
@@ -61,7 +151,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         self.widgetlist = QtGui.QListWidget()
         self.widgetlist.setFixedHeight(410)
         self.widgetlist.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
-        self.widgetlist.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        self.widgetlist.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
         self.widgetlist.setStyleSheet("""
                                     QListWidget {
                                         background-color:#444444;
@@ -81,34 +171,34 @@ class LightInterfaceWindow(QtGui.QMainWindow):
                                     """
                                     )
 
-        # Update List button
-        updatebutton_layout = QtGui.QHBoxLayout()
+        # Render Layer Only and Update List buttons
+        left_buttons_layout = QtGui.QHBoxLayout()
 
-        self.renderlayer_button = self.newButton('Show Current Render Layer Only', 7)
-        self.updatebutton = self.newButton('Update List', 8)
+        self.renderlayer_button = new_button('Show Current Render Layer Only', 7)
+        self.updatebutton = new_button('Update List', 8)
 
         # Bottom checkbox
         bottomleft_layout = QtGui.QHBoxLayout()
-        self.timeline_listener = self.newCheckbox('Listen to Timeline Changes')
+        self.timeline_listener = new_checkbox('Listen to Timeline Changes')
 
         # ===== RIGHT SIDE OF THE WINDOW =====
 
         # Intensity Top Label
-        intensitylabel_leftline = self.add_line(50)
+        intensitylabel_leftline = add_line(50)
         intensitylabel_layout = QtGui.QHBoxLayout()
-        intensitylabel = self.newLabel('Intensity', 7, 333333, True)
-        intensitylabel_rightline = self.add_line(50)
+        intensitylabel = new_label('Intensity', 7, 333333, True)
+        intensitylabel_rightline = add_line(50)
 
         # Main Intensity layout, Current Intensity label, modifying textbox and Operator combo box
         intensity_layout = QtGui.QVBoxLayout()
 
         currentintensity_layout = QtGui.QHBoxLayout()
-        intensitycurrent_label = self.newLabel('Current:', 8, 333333, True)
-        self.currentintensity_label = self.newLabel('N/A', 11, 222222, True)
+        intensitycurrent_label = new_label('Current:', 8, 333333, True)
+        self.currentintensity_label = new_label('N/A', 11, 222222, True)
 
         setintensity_layout = QtGui.QHBoxLayout()
-        intensityquantity_label = self.newLabel('Set:', 8, 333333)
-        self.intensityquantity_textbox = self.newLineEdit(60)
+        intensityquantity_label = new_label('Set:', 8, 333333)
+        self.intensityquantity_textbox = new_line_edit(60)
 
         self.intensityoperator_combo = QtGui.QComboBox()
         self.intensityoperator_combo.addItem("fixed quantity")
@@ -121,14 +211,14 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         # Intensity Bottom Widgets
         intensity_bottomlayout = QtGui.QHBoxLayout()
 
-        self.keyframeintensity_checkbox = self.newCheckbox('Set Keyframe')
-        self.applyintensity_button = self.newButton('Apply Intensity')
+        self.keyframeintensity_checkbox = new_checkbox('Set Keyframe')
+        self.applyintensity_button = new_button('Apply Intensity')
 
         # Light Color Top Label
-        colorlabel_leftline = self.add_line(60)
+        colorlabel_leftline = add_line(60)
         colorlabel_layout = QtGui.QHBoxLayout()
-        colorlabel = self.newLabel('Color', 7, 333333, True)
-        colorlabel_rightline = self.add_line(60)
+        colorlabel = new_label('Color', 7, 333333, True)
+        colorlabel_rightline = add_line(60)
 
         # Light Color Dialog Prompter, RGB/HSV boxes and Frame
         color_layout = QtGui.QHBoxLayout()
@@ -140,31 +230,31 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         self.color_frame = colorFrame(main_container, 1, self.color_light.red(),
                                       self.color_light.green(), self.color_light.blue())
 
-        r_label = self.newLabel('R:', 9, 333333)
-        g_label = self.newLabel('G:', 9, 333333)
-        b_label = self.newLabel('B:', 9, 333333)
-        h_label = self.newLabel('H:', 9, 333333)
-        s_label = self.newLabel('S:', 9, 333333)
-        v_label = self.newLabel('V:', 9, 333333)
+        r_label = new_label('R:', 9, 333333)
+        g_label = new_label('G:', 9, 333333)
+        b_label = new_label('B:', 9, 333333)
+        h_label = new_label('H:', 9, 333333)
+        s_label = new_label('S:', 9, 333333)
+        v_label = new_label('V:', 9, 333333)
 
-        self.r_textbox = self.newLineEdit(40, True)
-        self.g_textbox = self.newLineEdit(40, True)
-        self.b_textbox = self.newLineEdit(40, True)
-        self.h_textbox = self.newLineEdit(40, True)
-        self.s_textbox = self.newLineEdit(40, True)
-        self.v_textbox = self.newLineEdit(40, True)
+        self.r_textbox = new_line_edit(40, True)
+        self.g_textbox = new_line_edit(40, True)
+        self.b_textbox = new_line_edit(40, True)
+        self.h_textbox = new_line_edit(40, True)
+        self.s_textbox = new_line_edit(40, True)
+        self.v_textbox = new_line_edit(40, True)
 
         # Light Color Bottom
         lightcolor_bottomlayout = QtGui.QHBoxLayout()
 
-        self.keyframecolor_checkbox = self.newCheckbox('Set Keyframe')
-        self.applycolor_button = self.newButton('Apply Color')
+        self.keyframecolor_checkbox = new_checkbox('Set Keyframe')
+        self.applycolor_button = new_button('Apply Color')
 
         # Shadow Color Top Label
-        colorshadowlabel_leftline = self.add_line(50)
+        colorshadowlabel_leftline = add_line(50)
         colorshadowlabel_layout = QtGui.QHBoxLayout()
-        colorshadowlabel = self.newLabel('Shadow Color', 7, 333333, True)
-        colorshadowlabel_rightline = self.add_line(50)
+        colorshadowlabel = new_label('Shadow Color', 7, 333333, True)
+        colorshadowlabel_rightline = add_line(50)
 
         # Shadow Color Dialog Prompter, RGB/HSV boxes and Frame
         colorshadow_layout = QtGui.QHBoxLayout()
@@ -176,31 +266,31 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         self.colorshadow_frame = colorFrame(main_container, 2, self.color_shadow.red(),
                                             self.color_shadow.green(), self.color_shadow.blue())
 
-        rshadow_label = self.newLabel('R:', 9, 333333)
-        gshadow_label = self.newLabel('G:', 9, 333333)
-        bshadow_label = self.newLabel('B:', 9, 333333)
-        hshadow_label = self.newLabel('H:', 9, 333333)
-        sshadow_label = self.newLabel('S:', 9, 333333)
-        vshadow_label = self.newLabel('V:', 9, 333333)
+        rshadow_label = new_label('R:', 9, 333333)
+        gshadow_label = new_label('G:', 9, 333333)
+        bshadow_label = new_label('B:', 9, 333333)
+        hshadow_label = new_label('H:', 9, 333333)
+        sshadow_label = new_label('S:', 9, 333333)
+        vshadow_label = new_label('V:', 9, 333333)
 
-        self.rshadow_textbox = self.newLineEdit(40, True)
-        self.gshadow_textbox = self.newLineEdit(40, True)
-        self.bshadow_textbox = self.newLineEdit(40, True)
-        self.hshadow_textbox = self.newLineEdit(40, True)
-        self.sshadow_textbox = self.newLineEdit(40, True)
-        self.vshadow_textbox = self.newLineEdit(40, True)
+        self.rshadow_textbox = new_line_edit(40, True)
+        self.gshadow_textbox = new_line_edit(40, True)
+        self.bshadow_textbox = new_line_edit(40, True)
+        self.hshadow_textbox = new_line_edit(40, True)
+        self.sshadow_textbox = new_line_edit(40, True)
+        self.vshadow_textbox = new_line_edit(40, True)
 
         # Shadow Color Bottom
         shadowcolor_bottomlayout = QtGui.QHBoxLayout()
 
-        self.keyframeshadow_checkbox = self.newCheckbox('Set Keyframe')
-        self.applyshadow_button = self.newButton('Apply Shadow')
+        self.keyframeshadow_checkbox = new_checkbox('Set Keyframe')
+        self.applyshadow_button = new_button('Apply Shadow')
 
         # Render Layer Buttons
         renderlayer_layout = QtGui.QHBoxLayout()
 
-        self.renderlayer_add = self.newButton('Add to Render Layer', 7)
-        self.renderlayer_remove = self.newButton('Remove from Render Layer', 7)
+        self.renderlayer_add = new_button('Add to Render Layer', 7)
+        self.renderlayer_remove = new_button('Remove from Render Layer', 7)
 
         # ============ CONNECTIONS, SIGNALS AND CALLBACKS ============
 
@@ -209,10 +299,10 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         # ============ LAYOUTS ============
 
         # ------ Vertical box layout for the left side ------
-        verticalLayout_left = QtGui.QVBoxLayout()
+        vertical_layout_left = QtGui.QVBoxLayout()
 
         # ------ Vertical box layout for the right side ------
-        verticalLayout_right = QtGui.QVBoxLayout()
+        vertical_layout_right = QtGui.QVBoxLayout()
 
         # ------ Modifiers QFrame and Layout ------
         modifiers_layout = QtGui.QVBoxLayout()
@@ -226,230 +316,229 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         search_layout.addWidget(search_label)
         search_layout.addWidget(self.searchlight_tbox)
 
-        self.add_space(verticalLayout_left, 0, 10)
-        verticalLayout_left.addLayout(search_layout)
-        self.add_space(verticalLayout_left, 0, 5)
+        add_space(vertical_layout_left, 0, 10)
+        vertical_layout_left.addLayout(search_layout)
+        add_space(vertical_layout_left, 0, 5)
 
         # Widget list Layout
         widgetlist_layout.addWidget(self.widgetlist)
-        verticalLayout_left.addLayout(widgetlist_layout)
-        self.add_space(verticalLayout_left, 0, 5)
+        vertical_layout_left.addLayout(widgetlist_layout)
+        add_space(vertical_layout_left, 0, 5)
 
         # Render Layer Only and Update buttons at the left side
-        updatebutton_layout.addWidget(self.renderlayer_button)
-        updatebutton_layout.addStretch(1)
-        updatebutton_layout.addWidget(self.updatebutton)
+        left_buttons_layout.addWidget(self.renderlayer_button)
+        left_buttons_layout.addStretch(1)
+        left_buttons_layout.addWidget(self.updatebutton)
 
-        verticalLayout_left.addLayout(updatebutton_layout)
-        self.add_space(verticalLayout_left, 0, 5)
+        vertical_layout_left.addLayout(left_buttons_layout)
+        add_space(vertical_layout_left, 0, 5)
 
         # Timeline Listener Checkbox
         bottomleft_layout.addWidget(self.timeline_listener)
-        self.add_space(verticalLayout_left, 0, 15)
-        verticalLayout_left.addLayout(bottomleft_layout)
+        add_space(vertical_layout_left, 0, 15)
+        vertical_layout_left.addLayout(bottomleft_layout)
 
         # Intensity label
         intensitylabel_layout.addWidget(intensitylabel_leftline)
-        self.add_space(intensitylabel_layout, 15, 0)
+        add_space(intensitylabel_layout, 15, 0)
         intensitylabel_layout.addWidget(intensitylabel)
-        self.add_space(intensitylabel_layout, 15, 0)
+        add_space(intensitylabel_layout, 15, 0)
         intensitylabel_layout.addWidget(intensitylabel_rightline)
         intensitylabel_layout.setAlignment(QtCore.Qt.AlignCenter)
 
         modifiers_layout.addLayout(intensitylabel_layout)
-        self.add_space(modifiers_layout, 0, 5)
+        add_space(modifiers_layout, 0, 5)
 
         # Intensity modifiers
         currentintensity_layout.addWidget(intensitycurrent_label)
-        self.add_space(currentintensity_layout, 30, 0)
+        add_space(currentintensity_layout, 30, 0)
         currentintensity_layout.addWidget(self.currentintensity_label)
         currentintensity_layout.setAlignment(QtCore.Qt.AlignCenter)
 
         setintensity_layout.addWidget(intensityquantity_label)
-        self.add_space(setintensity_layout, 4, 0)
+        add_space(setintensity_layout, 4, 0)
         setintensity_layout.addWidget(self.intensityquantity_textbox)
-        self.add_space(setintensity_layout, 8, 0)
+        add_space(setintensity_layout, 8, 0)
         setintensity_layout.addWidget(self.intensityoperator_combo)
         setintensity_layout.setAlignment(QtCore.Qt.AlignCenter)
 
         intensity_layout.addLayout(currentintensity_layout)
-        self.add_space(intensity_layout, 0, 5)
+        add_space(intensity_layout, 0, 5)
         intensity_layout.addLayout(setintensity_layout)
 
         modifiers_layout.addLayout(intensity_layout)
-        self.add_space(modifiers_layout, 0, 6)
+        add_space(modifiers_layout, 0, 6)
 
         # Bottom elements of intensity
-        self.add_space(intensity_bottomlayout, 20, 0)
+        add_space(intensity_bottomlayout, 20, 0)
         intensity_bottomlayout.addWidget(self.keyframeintensity_checkbox)
         intensity_bottomlayout.addStretch(1)
         intensity_bottomlayout.addWidget(self.applyintensity_button)
-        self.add_space(intensity_bottomlayout, 20, 0)
+        add_space(intensity_bottomlayout, 20, 0)
 
         modifiers_layout.addLayout(intensity_bottomlayout)
-        self.add_space(modifiers_layout, 0, 10)
+        add_space(modifiers_layout, 0, 10)
 
         # Color label
         colorlabel_layout.addWidget(colorlabel_leftline)
-        self.add_space(colorlabel_layout, 15, 0)
+        add_space(colorlabel_layout, 15, 0)
         colorlabel_layout.addWidget(colorlabel)
-        self.add_space(colorlabel_layout, 15, 0)
+        add_space(colorlabel_layout, 15, 0)
         colorlabel_layout.addWidget(colorlabel_rightline)
         colorlabel_layout.setAlignment(QtCore.Qt.AlignCenter)
 
         modifiers_layout.addLayout(colorlabel_layout)
-        self.add_space(modifiers_layout, 0, 5)
+        add_space(modifiers_layout, 0, 5)
 
         # Color Canvas, Buttons and Textboxes
-        self.add_space(color_layout, 20, 0)
+        add_space(color_layout, 20, 0)
         color_layout.addWidget(self.color_frame)
 
         rh_layout.addWidget(r_label)
-        self.add_space(rh_layout, 2, 0)
+        add_space(rh_layout, 2, 0)
         rh_layout.addWidget(self.r_textbox)
         rh_layout.addStretch(1)
         rh_layout.addWidget(h_label)
-        self.add_space(rh_layout, 2, 0)
+        add_space(rh_layout, 2, 0)
         rh_layout.addWidget(self.h_textbox)
-        self.add_space(rh_layout, 20, 0)
+        add_space(rh_layout, 20, 0)
         colorTextboxes_layout.addLayout(rh_layout)
 
         gs_layout.addWidget(g_label)
-        self.add_space(gs_layout, 2, 0)
+        add_space(gs_layout, 2, 0)
         gs_layout.addWidget(self.g_textbox)
         gs_layout.addStretch(1)
         gs_layout.addWidget(s_label)
-        self.add_space(gs_layout, 2, 0)
+        add_space(gs_layout, 2, 0)
         gs_layout.addWidget(self.s_textbox)
-        self.add_space(gs_layout, 20, 0)
+        add_space(gs_layout, 20, 0)
         colorTextboxes_layout.addLayout(gs_layout)
 
         bv_layout.addWidget(b_label)
-        self.add_space(bv_layout, 2, 0)
+        add_space(bv_layout, 2, 0)
         bv_layout.addWidget(self.b_textbox)
         bv_layout.addStretch(1)
         bv_layout.addWidget(v_label)
-        self.add_space(bv_layout, 2, 0)
+        add_space(bv_layout, 2, 0)
         bv_layout.addWidget(self.v_textbox)
-        self.add_space(bv_layout, 20, 0)
+        add_space(bv_layout, 20, 0)
         colorTextboxes_layout.addLayout(bv_layout)
 
         color_layout.addLayout(colorTextboxes_layout)
 
-        self.add_space(modifiers_layout, 0, 5)
+        add_space(modifiers_layout, 0, 5)
         modifiers_layout.addLayout(color_layout)
-        self.add_space(modifiers_layout, 0, 5)
+        add_space(modifiers_layout, 0, 5)
 
         # Bottom elements of light color
-        self.add_space(lightcolor_bottomlayout, 20, 0)
+        add_space(lightcolor_bottomlayout, 20, 0)
         lightcolor_bottomlayout.addWidget(self.keyframecolor_checkbox)
         lightcolor_bottomlayout.addStretch(1)
         lightcolor_bottomlayout.addWidget(self.applycolor_button)
-        self.add_space(lightcolor_bottomlayout, 20, 0)
+        add_space(lightcolor_bottomlayout, 20, 0)
         lightcolor_bottomlayout.setAlignment(QtCore.Qt.AlignLeft)
 
         modifiers_layout.addLayout(lightcolor_bottomlayout)
-        self.add_space(modifiers_layout, 0, 10)
+        add_space(modifiers_layout, 0, 10)
 
         # Shadow Color label
         colorshadowlabel_layout.addWidget(colorshadowlabel_leftline)
-        self.add_space(colorshadowlabel_layout, 15, 0)
+        add_space(colorshadowlabel_layout, 15, 0)
         colorshadowlabel_layout.addWidget(colorshadowlabel)
-        self.add_space(colorshadowlabel_layout, 15, 0)
+        add_space(colorshadowlabel_layout, 15, 0)
         colorshadowlabel_layout.addWidget(colorshadowlabel_rightline)
         colorshadowlabel_layout.setAlignment(QtCore.Qt.AlignCenter)
 
         modifiers_layout.addLayout(colorshadowlabel_layout)
-        self.add_space(modifiers_layout, 0, 5)
+        add_space(modifiers_layout, 0, 5)
 
         # Shadow Color Canvas, Buttons and Textboxes
-        self.add_space(colorshadow_layout, 20, 0)
+        add_space(colorshadow_layout, 20, 0)
         colorshadow_layout.addWidget(self.colorshadow_frame)
 
         rhshadow_layout.addWidget(rshadow_label)
-        self.add_space(rhshadow_layout, 2, 0)
+        add_space(rhshadow_layout, 2, 0)
         rhshadow_layout.addWidget(self.rshadow_textbox)
         rhshadow_layout.addStretch(1)
         rhshadow_layout.addWidget(hshadow_label)
-        self.add_space(rhshadow_layout, 2, 0)
+        add_space(rhshadow_layout, 2, 0)
         rhshadow_layout.addWidget(self.hshadow_textbox)
-        self.add_space(rhshadow_layout, 20, 0)
+        add_space(rhshadow_layout, 20, 0)
         colorshadowTextboxes_layout.addLayout(rhshadow_layout)
 
         gsshadow_layout.addWidget(gshadow_label)
-        self.add_space(gsshadow_layout, 2, 0)
+        add_space(gsshadow_layout, 2, 0)
         gsshadow_layout.addWidget(self.gshadow_textbox)
         gsshadow_layout.addStretch(1)
         gsshadow_layout.addWidget(sshadow_label)
-        self.add_space(gsshadow_layout, 2, 0)
+        add_space(gsshadow_layout, 2, 0)
         gsshadow_layout.addWidget(self.sshadow_textbox)
-        self.add_space(gsshadow_layout, 20, 0)
+        add_space(gsshadow_layout, 20, 0)
         colorshadowTextboxes_layout.addLayout(gsshadow_layout)
 
         bvshadow_layout.addWidget(bshadow_label)
-        self.add_space(bvshadow_layout, 2, 0)
+        add_space(bvshadow_layout, 2, 0)
         bvshadow_layout.addWidget(self.bshadow_textbox)
         bvshadow_layout.addStretch(1)
         bvshadow_layout.addWidget(vshadow_label)
-        self.add_space(bvshadow_layout, 2, 0)
+        add_space(bvshadow_layout, 2, 0)
         bvshadow_layout.addWidget(self.vshadow_textbox)
-        self.add_space(bvshadow_layout, 20, 0)
+        add_space(bvshadow_layout, 20, 0)
         colorshadowTextboxes_layout.addLayout(bvshadow_layout)
 
         colorshadow_layout.addLayout(colorshadowTextboxes_layout)
         colorshadow_layout.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
-        self.add_space(modifiers_layout, 0, 5)
+        add_space(modifiers_layout, 0, 5)
         modifiers_layout.addLayout(colorshadow_layout)
 
         # Bottom elements of shadow color
-        self.add_space(shadowcolor_bottomlayout, 20, 0)
+        add_space(shadowcolor_bottomlayout, 20, 0)
         shadowcolor_bottomlayout.addWidget(self.keyframeshadow_checkbox)
         shadowcolor_bottomlayout.addStretch(1)
         shadowcolor_bottomlayout.addWidget(self.applyshadow_button)
-        self.add_space(shadowcolor_bottomlayout, 20, 0)
+        add_space(shadowcolor_bottomlayout, 20, 0)
         shadowcolor_bottomlayout.setAlignment(QtCore.Qt.AlignLeft)
 
-        self.add_space(modifiers_layout, 0, 5)
+        add_space(modifiers_layout, 0, 5)
         modifiers_layout.addLayout(shadowcolor_bottomlayout)
-        self.add_space(modifiers_layout, 0, 10)
+        add_space(modifiers_layout, 0, 10)
 
         modifiers_layout.setAlignment(QtCore.Qt.AlignCenter)
-        verticalLayout_right.addWidget(modifiers_frame)
+        vertical_layout_right.addWidget(modifiers_frame)
+
+        # Finish modifiers' layout by setting it to the modifier frame
+        modifiers_frame.setLayout(modifiers_layout)
 
         # Render Layer Buttons
         renderlayer_layout.addWidget(self.renderlayer_add)
-        self.add_space(renderlayer_layout, 20, 0)
+        add_space(renderlayer_layout, 20, 0)
         renderlayer_layout.addWidget(self.renderlayer_remove)
         renderlayer_layout.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.add_space(verticalLayout_right, 0, 15)
-        verticalLayout_right.addLayout(renderlayer_layout)
+        add_space(vertical_layout_right, 0, 15)
+        vertical_layout_right.addLayout(renderlayer_layout)
 
         # Set Alignments for containers
-        verticalLayout_left.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        verticalLayout_right.setAlignment(QtCore.Qt.AlignVCenter)
+        vertical_layout_left.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        vertical_layout_right.setAlignment(QtCore.Qt.AlignVCenter)
 
         # Main layout (Horizontal) for the whole window
-        mainLayout = QtGui.QHBoxLayout()
-        self.add_space(mainLayout, 10, 0)
-        mainLayout.addLayout(verticalLayout_left)
-        self.add_space(mainLayout, 20, 0)
-        mainLayout.addLayout(verticalLayout_right)
-        self.add_space(mainLayout, 10, 0)
+        main_layout = QtGui.QHBoxLayout()
+        add_space(main_layout, 10, 0)
+        main_layout.addLayout(vertical_layout_left)
+        add_space(main_layout, 20, 0)
+        main_layout.addLayout(vertical_layout_right)
+        add_space(main_layout, 10, 0)
 
         # Fill the color textboxes with the default colors
         self.update_lightcolor_boxes(self.color_light)
         self.update_shadowcolor_boxes(self.color_shadow)
 
-        modifiers_frame.setLayout(modifiers_layout)
-        main_container.setLayout(mainLayout)
+        main_container.setLayout(main_layout)
         self.setWindowTitle('Light Interface')
-        # self.setFixedSize(620, 600)
         self.setFixedHeight(600)
         self.setObjectName('lightInterfaceUI')
-
-        self.show()
 
     def color_selected(self, color, where):
         """
@@ -700,95 +789,6 @@ class LightInterfaceWindow(QtGui.QMainWindow):
 
         self.colorshadow_frame.update_color(self.color_shadow)
 
-    def add_space(self, layout, x, y):
-        """
-        Add a spacer in the window's layouts
-        :param layout: Layout where the spacer will be added
-        :param x: Width of spacer
-        :param y: Height of spacer
-        :return: None
-        """
-        spacer = QtGui.QSpacerItem(x, y)
-        layout.addSpacerItem(spacer)
-
-    def add_line(self, length):
-        """
-        Return a thick line to add in the layouts
-        :param length: Length of the line
-        :return: QFrame in the form of a line
-        """
-        line = QtGui.QFrame()
-        line.setFixedWidth(length)
-        line.setGeometry(QtCore.QRect(0, 0, length, 0))
-        line.setFrameShape(QtGui.QFrame.HLine)
-        return line
-
-    def newButton(self, text, font_size=None):
-        """
-        Returns a new button
-        :param text: Text that the button will contain
-        :param font_size: Optional Font size of the button's text
-        :return: QPushButton
-        """
-        button = QtGui.QPushButton('  ' + text + '  ')
-        button.setStyleSheet("background-color:#555555; color:#CCCCCC;")
-        button.setFixedHeight(25)
-        if font_size is not None:
-            font = QtGui.QFont()
-            font.setPointSize(font_size)
-            button.setFont(font)
-        return button
-
-    def newCheckbox(self, text):
-        """
-        Return a new Checkbox
-        :param text: Text that will accompany the checkbox
-        :return: QCheckbox
-        """
-        checkbox = QtGui.QCheckBox(text)
-        checkbox.setStyleSheet('color:#333333;')
-
-        cb_palette = checkbox.palette()
-        cb_palette.setColor(QtGui.QPalette.Base, QtCore.Qt.gray)
-        checkbox.setPalette(cb_palette)
-
-        return checkbox
-
-    def newLabel(self, text, size, color, bold=False):
-        """
-        Return a new QLabel
-        :param text: Text that will be contained by the label
-        :param size: Size of the label's text
-        :param color: Color of the label's text
-        :param bold: Boolean that tells whether to bold the label or not
-        :return: QLabel
-        """
-        label = QtGui.QLabel(text)
-        label.setStyleSheet('color:#%d;' % color)
-        label.setAlignment(QtCore.Qt.AlignCenter)
-        label.setFixedHeight(20)
-
-        font = QtGui.QFont()
-        font.setPointSize(size)
-        if bold:
-            font.setBold(bold)
-        label.setFont(font)
-        return label
-
-    def newLineEdit(self, size, readonly=False):
-        """
-        Return a new QLineEdit with standard styling
-        :param size: Width of the textbox
-        :param readonly: Boolean that tells whether to make it non-modifiable
-        :return:
-        """
-        textbox = QtGui.QLineEdit()
-        textbox.setFixedSize(size, 20)
-        textbox.setStyleSheet('background-color:#444444; border:none; color:#FFFFFF')
-        textbox.setReadOnly(readonly)
-        textbox.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        return textbox
-
     # ============ OVERRIDDEN FUNCTIONS ============
 
     # When the window is closed, kill the MEvent Message Callback
@@ -909,6 +909,7 @@ def main():
     Test function for PySide only window template
     :return: None
     """
+    import sys
 
     app = QtGui.QApplication(sys.argv)
 
@@ -926,6 +927,8 @@ def main():
         ex.populate_itemlist(test_array, current_selection)
 
     fill_itemlist()
+
+    ex.show()
 
     app.exec_()
 
