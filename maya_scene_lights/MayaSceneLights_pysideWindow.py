@@ -149,9 +149,8 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         # Widget List that will hold the light names in the scene, and its container layout
         widgetlist_layout = QtGui.QHBoxLayout()
         self.widgetlist = QtGui.QListWidget()
-        self.widgetlist.setFixedHeight(410)
+        self.widgetlist.setMinimumHeight(400)
         self.widgetlist.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
-        self.widgetlist.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
         self.widgetlist.setStyleSheet("""
                                     QListWidget {
                                         background-color:#444444;
@@ -337,6 +336,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         bottomleft_layout.addWidget(self.timeline_listener)
         add_space(vertical_layout_left, 0, 15)
         vertical_layout_left.addLayout(bottomleft_layout)
+        add_space(vertical_layout_left, 0, 5)
 
         # Intensity label
         intensitylabel_layout.addWidget(intensitylabel_leftline)
@@ -520,8 +520,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         vertical_layout_right.addLayout(renderlayer_layout)
 
         # Set Alignments for containers
-        vertical_layout_left.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        vertical_layout_right.setAlignment(QtCore.Qt.AlignVCenter)
+        vertical_layout_right.setAlignment(QtCore.Qt.AlignTop)
 
         # Main layout (Horizontal) for the whole window
         main_layout = QtGui.QHBoxLayout()
@@ -537,7 +536,6 @@ class LightInterfaceWindow(QtGui.QMainWindow):
 
         main_container.setLayout(main_layout)
         self.setWindowTitle('Light Interface')
-        self.setFixedHeight(600)
         self.setObjectName('lightInterfaceUI')
 
     def color_selected(self, color, where):
