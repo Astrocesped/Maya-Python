@@ -4,20 +4,6 @@
 
 import pymel.core as pmc
 
-# Imports used to get the main Maya Window as a parent
-import maya.OpenMayaUI as OpenMayaUI
-import shiboken
-from PySide import QtGui
-
-
-def get_maya_window():
-    """
-    :return: Wrapped instance of a pointer that leads to the main Maya window
-    """
-
-    pointer = OpenMayaUI.MQtUtil.mainWindow()
-    return shiboken.wrapInstance(long(pointer), QtGui.QWidget)
-
 
 # Context manager that opens an undo chunk when entered, and closes it on exit
 class undo_chunk(object):

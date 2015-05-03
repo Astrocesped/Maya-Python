@@ -5,6 +5,17 @@ __author__ = 'Carlos Montes'
 from PySide import QtGui, QtCore
 import os
 import maya.OpenMaya as OpenMaya
+import maya.OpenMayaUI as OpenMayaUI
+import shiboken
+
+
+def get_maya_window():
+    """
+    Gets the Main Maya window
+    :return: Returns a wrapped instance of the main Maya window
+    """
+    pointer = OpenMayaUI.MQtUtil.mainWindow()
+    return shiboken.wrapInstance(long(pointer), QtGui.QWidget)
 
 
 class LightInterfaceWindow(QtGui.QMainWindow):
@@ -95,7 +106,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
             :return: QCheckbox
             """
             checkbox = QtGui.QCheckBox(text)
-            checkbox.setStyleSheet('color:#333333;')
+            checkbox.setStyleSheet('color:#EEEEEE;')
     
             cb_palette = checkbox.palette()
             cb_palette.setColor(QtGui.QPalette.Base, QtCore.Qt.gray)
@@ -103,7 +114,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
     
             return checkbox
     
-        def new_label(text, size, color, bold=False):
+        def new_label(text, size, bold=False):
             """
             Return a new QLabel
             :param text: Text that will be contained by the label
@@ -113,7 +124,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
             :return: QLabel
             """
             label = QtGui.QLabel(text)
-            label.setStyleSheet('color:#%d;' % color)
+            label.setStyleSheet('color:#EEEEEE;')
             label.setAlignment(QtCore.Qt.AlignCenter)
             label.setFixedHeight(20)
     
@@ -133,7 +144,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
             """
             textbox = QtGui.QLineEdit()
             textbox.setFixedSize(size, 20)
-            textbox.setStyleSheet('background-color:#444444; border:none; color:#FFFFFF')
+            textbox.setStyleSheet('background-color:#6E6E6E; border:none; color:#FFFFFF')
             textbox.setReadOnly(readonly)
             textbox.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
             return textbox
@@ -142,7 +153,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
 
         # Search Textbox (and its Focus Policy) and its label, along with its container layout
         search_layout = QtGui.QHBoxLayout()
-        search_label = new_label('Search Lights:', 7, 333333)
+        search_label = new_label('Search Lights:', 8)
         self.searchlight_tbox = new_line_edit(110)
         self.searchlight_tbox.setFocusPolicy(QtCore.Qt.StrongFocus)
 
@@ -153,11 +164,10 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         self.widgetlist.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         self.widgetlist.setStyleSheet("""
                                     QListWidget {
-                                        background-color:#444444;
+                                        background-color:#6E6E6E;
                                     }
                                     QListWidget:item {
-                                         height:45px;
-                                         color:#444444;
+                                         color:#6E6E6E;
                                     }
                                     QListWidget:item:selected {
                                          background-color:#1894C4;
@@ -183,20 +193,19 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         # ===== RIGHT SIDE OF THE WINDOW =====
 
         # Intensity Top Label
-        intensitylabel_leftline = add_line(50)
         intensitylabel_layout = QtGui.QHBoxLayout()
-        intensitylabel = new_label('Intensity', 7, 333333, True)
-        intensitylabel_rightline = add_line(50)
+        intensitylabel = new_label('Intensity', 10, True)
+        intensitylabel_rightline = add_line(100)
 
         # Main Intensity layout, Current Intensity label, modifying textbox and Operator combo box
         intensity_layout = QtGui.QVBoxLayout()
 
         currentintensity_layout = QtGui.QHBoxLayout()
-        intensitycurrent_label = new_label('Current:', 8, 333333, True)
-        self.currentintensity_label = new_label('N/A', 11, 222222, True)
+        intensitycurrent_label = new_label('Current:', 8)
+        self.currentintensity_label = new_label('N/A', 11, True)
 
         setintensity_layout = QtGui.QHBoxLayout()
-        intensityquantity_label = new_label('Set:', 8, 333333)
+        intensityquantity_label = new_label('Set:', 8)
         self.intensityquantity_textbox = new_line_edit(60)
 
         self.intensityoperator_combo = QtGui.QComboBox()
@@ -214,10 +223,9 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         self.applyintensity_button = new_button('Apply Intensity')
 
         # Light Color Top Label
-        colorlabel_leftline = add_line(60)
         colorlabel_layout = QtGui.QHBoxLayout()
-        colorlabel = new_label('Color', 7, 333333, True)
-        colorlabel_rightline = add_line(60)
+        colorlabel = new_label('Color', 10, True)
+        colorlabel_rightline = add_line(100)
 
         # Light Color Dialog Prompter, RGB/HSV boxes and Frame
         color_layout = QtGui.QHBoxLayout()
@@ -229,12 +237,12 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         self.color_frame = colorFrame(main_container, 1, self.color_light.red(),
                                       self.color_light.green(), self.color_light.blue())
 
-        r_label = new_label('R:', 9, 333333)
-        g_label = new_label('G:', 9, 333333)
-        b_label = new_label('B:', 9, 333333)
-        h_label = new_label('H:', 9, 333333)
-        s_label = new_label('S:', 9, 333333)
-        v_label = new_label('V:', 9, 333333)
+        r_label = new_label('R:', 9)
+        g_label = new_label('G:', 9)
+        b_label = new_label('B:', 9)
+        h_label = new_label('H:', 9)
+        s_label = new_label('S:', 9)
+        v_label = new_label('V:', 9)
 
         self.r_textbox = new_line_edit(40, True)
         self.g_textbox = new_line_edit(40, True)
@@ -250,10 +258,9 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         self.applycolor_button = new_button('Apply Color')
 
         # Shadow Color Top Label
-        colorshadowlabel_leftline = add_line(50)
         colorshadowlabel_layout = QtGui.QHBoxLayout()
-        colorshadowlabel = new_label('Shadow Color', 7, 333333, True)
-        colorshadowlabel_rightline = add_line(50)
+        colorshadowlabel = new_label('Shadow Color', 10, True)
+        colorshadowlabel_rightline = add_line(100)
 
         # Shadow Color Dialog Prompter, RGB/HSV boxes and Frame
         colorshadow_layout = QtGui.QHBoxLayout()
@@ -265,12 +272,12 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         self.colorshadow_frame = colorFrame(main_container, 2, self.color_shadow.red(),
                                             self.color_shadow.green(), self.color_shadow.blue())
 
-        rshadow_label = new_label('R:', 9, 333333)
-        gshadow_label = new_label('G:', 9, 333333)
-        bshadow_label = new_label('B:', 9, 333333)
-        hshadow_label = new_label('H:', 9, 333333)
-        sshadow_label = new_label('S:', 9, 333333)
-        vshadow_label = new_label('V:', 9, 333333)
+        rshadow_label = new_label('R:', 9)
+        gshadow_label = new_label('G:', 9)
+        bshadow_label = new_label('B:', 9)
+        hshadow_label = new_label('H:', 9)
+        sshadow_label = new_label('S:', 9)
+        vshadow_label = new_label('V:', 9)
 
         self.rshadow_textbox = new_line_edit(40, True)
         self.gshadow_textbox = new_line_edit(40, True)
@@ -313,6 +320,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         # Search box Layout
         search_layout.addStretch(1)
         search_layout.addWidget(search_label)
+        add_space(search_layout, 5, 0)
         search_layout.addWidget(self.searchlight_tbox)
 
         add_space(vertical_layout_left, 0, 10)
@@ -339,32 +347,37 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         add_space(vertical_layout_left, 0, 5)
 
         # Intensity label
-        intensitylabel_layout.addWidget(intensitylabel_leftline)
-        add_space(intensitylabel_layout, 15, 0)
+        add_space(intensitylabel_layout, 20, 0)
         intensitylabel_layout.addWidget(intensitylabel)
-        add_space(intensitylabel_layout, 15, 0)
+        intensitylabel_layout.addStretch(1)
         intensitylabel_layout.addWidget(intensitylabel_rightline)
-        intensitylabel_layout.setAlignment(QtCore.Qt.AlignCenter)
+        add_space(intensitylabel_layout, 20, 0)
+        intensitylabel_layout.setAlignment(QtCore.Qt.AlignLeft)
 
         modifiers_layout.addLayout(intensitylabel_layout)
         add_space(modifiers_layout, 0, 5)
 
         # Intensity modifiers
+        add_space(currentintensity_layout, 20, 0)
         currentintensity_layout.addWidget(intensitycurrent_label)
-        add_space(currentintensity_layout, 30, 0)
+        currentintensity_layout.addStretch(1)
         currentintensity_layout.addWidget(self.currentintensity_label)
-        currentintensity_layout.setAlignment(QtCore.Qt.AlignCenter)
+        add_space(currentintensity_layout, 20, 0)
+        currentintensity_layout.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
 
+        add_space(setintensity_layout, 20, 0)
         setintensity_layout.addWidget(intensityquantity_label)
-        add_space(setintensity_layout, 4, 0)
+        add_space(setintensity_layout, 6, 0)
         setintensity_layout.addWidget(self.intensityquantity_textbox)
-        add_space(setintensity_layout, 8, 0)
+        setintensity_layout.addStretch(1)
         setintensity_layout.addWidget(self.intensityoperator_combo)
-        setintensity_layout.setAlignment(QtCore.Qt.AlignCenter)
+        add_space(setintensity_layout, 20, 0)
+        setintensity_layout.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
 
         intensity_layout.addLayout(currentintensity_layout)
-        add_space(intensity_layout, 0, 5)
+        add_space(intensity_layout, 0, 10)
         intensity_layout.addLayout(setintensity_layout)
+        add_space(intensity_layout, 0, 10)
 
         modifiers_layout.addLayout(intensity_layout)
         add_space(modifiers_layout, 0, 6)
@@ -380,11 +393,11 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         add_space(modifiers_layout, 0, 10)
 
         # Color label
-        colorlabel_layout.addWidget(colorlabel_leftline)
-        add_space(colorlabel_layout, 15, 0)
+        add_space(colorlabel_layout, 20, 0)
         colorlabel_layout.addWidget(colorlabel)
-        add_space(colorlabel_layout, 15, 0)
+        colorlabel_layout.addStretch(1)
         colorlabel_layout.addWidget(colorlabel_rightline)
+        add_space(colorlabel_layout, 20, 0)
         colorlabel_layout.setAlignment(QtCore.Qt.AlignCenter)
 
         modifiers_layout.addLayout(colorlabel_layout)
@@ -442,11 +455,11 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         add_space(modifiers_layout, 0, 10)
 
         # Shadow Color label
-        colorshadowlabel_layout.addWidget(colorshadowlabel_leftline)
-        add_space(colorshadowlabel_layout, 15, 0)
+        add_space(colorshadowlabel_layout, 20, 0)
         colorshadowlabel_layout.addWidget(colorshadowlabel)
-        add_space(colorshadowlabel_layout, 15, 0)
+        colorshadowlabel_layout.addStretch(1)
         colorshadowlabel_layout.addWidget(colorshadowlabel_rightline)
+        add_space(colorshadowlabel_layout, 20, 0)
         colorshadowlabel_layout.setAlignment(QtCore.Qt.AlignCenter)
 
         modifiers_layout.addLayout(colorshadowlabel_layout)
@@ -609,6 +622,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
 
             # Create a ListWidgetItem with the light's name. This text will be hidden with the widgetlist's Stylesheet
             list_item = QtGui.QListWidgetItem(self.lightsArray[counter])
+            list_item.setSizeHint(QtCore.QSize(0, 50))
 
             # Create a Custom Widget with the light's name and an icon according to its type and render layer presence
             custom_widget = CustomListWidgetItem(self.widgetlist, self.lightsArray[counter],
@@ -877,26 +891,26 @@ class CustomListWidgetItem(QtGui.QWidget):
         super(CustomListWidgetItem, self).__init__(parent)
 
         main_layout = QtGui.QHBoxLayout()
+        self.setFixedHeight(50)
 
-        self.light_icon = QtGui.QLabel()
-        self.light_icon.setFixedSize(45, 45)
-        pixmap = QtGui.QPixmap(30, 30)
+        light_icon = QtGui.QLabel()
+        light_icon.setFixedSize(38, 38)
+        pixmap = QtGui.QImage(icon_path)
         pixmap.load(icon_path)
-        self.light_icon.setPixmap(pixmap)
-        self.light_icon.setAlignment(QtCore.Qt.AlignTop)
+        light_icon.setPixmap(QtGui.QPixmap.fromImage(pixmap))
 
-        self.light_name = QtGui.QLabel(name)
+        light_name = QtGui.QLabel(name)
         font = QtGui.QFont()
         font.setPointSize(10)
-        self.light_name.setFont(font)
-        self.light_name.setStyleSheet('color:#FFFFFF')
+        light_name.setFont(font)
+        light_name.setStyleSheet('color:#FFFFFF')
 
         spacer = QtGui.QSpacerItem(10, 0)
         main_layout.addSpacerItem(spacer)
-        main_layout.addWidget(self.light_icon)
-        spacer = QtGui.QSpacerItem(20, 0)
+        main_layout.addWidget(light_icon)
+        spacer = QtGui.QSpacerItem(10, 0)
         main_layout.addSpacerItem(spacer)
-        main_layout.addWidget(self.light_name)
+        main_layout.addWidget(light_name)
         main_layout.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
 
         self.setLayout(main_layout)

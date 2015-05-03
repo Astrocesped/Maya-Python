@@ -2,11 +2,11 @@ __author__ = 'Carlos Montes'
 
 ''' Connects the QtGui window in windowTemplate.py to the Maya Environment. '''
 
-from MayaSceneLights_pysideWindow import LightInterfaceWindow
+import MayaSceneLights_pysideWindow as pyside_window
 import MayaSceneLights_applyChanges
 import mayautils
 
-from PySide import QtCore
+from PySide import QtCore, QtGui
 import pymel.core as pmc
 import maya.OpenMaya as OpenMaya
 
@@ -22,13 +22,13 @@ def show():
     # ================= WINDOW INSTANCE, BACKGROUND AND UTILITY FUNCTIONS =================
 
     # Get the main Maya window as a parent of the interface
-    parentwindow = mayautils.get_maya_window()
+    parentwindow = pyside_window.get_maya_window()
 
-    _window = LightInterfaceWindow(parent=parentwindow)
+    _window = pyside_window.LightInterfaceWindow(parent=parentwindow)
 
     # Change the window's background color
     background_palette = _window.palette()
-    background_palette.setColor(_window.backgroundRole(), QtCore.Qt.darkGray)
+    background_palette.setColor(_window.backgroundRole(), QtGui.QColor(46, 46, 46))
     _window.setPalette(background_palette)
 
     def get_selected_widgetitems():
