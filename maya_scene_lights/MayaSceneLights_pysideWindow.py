@@ -149,7 +149,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
             textbox.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
             return textbox
 
-        # ===== LEFT SIDE OF THE WINDOW =====
+        # =============== LEFT SIDE OF THE WINDOW ===============
 
         # Search Textbox (and its Focus Policy) and its label, along with its container layout
         search_layout = QtGui.QHBoxLayout()
@@ -190,7 +190,13 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         bottomleft_layout = QtGui.QHBoxLayout()
         self.timeline_listener = new_checkbox('Listen to Timeline Changes')
 
-        # ===== RIGHT SIDE OF THE WINDOW =====
+        # ================ RIGHT SIDE OF THE WINDOW ===============
+
+        # QFrame container of the modifier widgets
+        modifiers_frame = QtGui.QFrame(main_container)
+        modifiers_frame.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Raised)
+        modifiers_frame.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        modifiers_frame.setLineWidth(1)
 
         # Intensity Top Label
         intensitylabel_layout = QtGui.QHBoxLayout()
@@ -310,12 +316,8 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         # ------ Vertical box layout for the right side ------
         vertical_layout_right = QtGui.QVBoxLayout()
 
-        # ------ Modifiers QFrame and Layout ------
+        # ------ Modifiers Layout and Widgets ------
         modifiers_layout = QtGui.QVBoxLayout()
-        modifiers_frame = QtGui.QFrame(main_container)
-        modifiers_frame.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Raised)
-        modifiers_frame.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        modifiers_frame.setLineWidth(1)
 
         # Search box Layout
         search_layout.addStretch(1)
