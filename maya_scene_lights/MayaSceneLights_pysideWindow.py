@@ -190,7 +190,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         bottomleft_layout = QtGui.QHBoxLayout()
         self.timeline_listener = new_checkbox('Listen to Timeline Changes')
 
-        # ================ RIGHT SIDE OF THE WINDOW ===============
+        # ================ RIGHT SIDE OF THE WINDOW =================
 
         # QFrame container of the modifier widgets
         modifiers_frame = QtGui.QFrame(main_container)
@@ -519,11 +519,12 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         modifiers_layout.addLayout(shadowcolor_bottomlayout)
         add_space(modifiers_layout, 0, 10)
 
-        modifiers_layout.setAlignment(QtCore.Qt.AlignCenter)
-        vertical_layout_right.addWidget(modifiers_frame)
-
-        # Finish modifiers' layout by setting it to the modifier frame
+        # Finish modifiers' layout by setting a Center Alignment and adding it to the modifier frame
         modifiers_frame.setLayout(modifiers_layout)
+        modifiers_layout.setAlignment(QtCore.Qt.AlignCenter)
+
+        # Add the QFrame to the right side's vertical layout
+        vertical_layout_right.addWidget(modifiers_frame)
 
         # Render Layer Buttons
         renderlayer_layout.addWidget(self.renderlayer_add)
