@@ -89,13 +89,10 @@ def show():
         :return: None
         """
         # Retrieve the current color value in the window
-        rgbhsv_query = _window.giveme_light_color()
-
-        if not rgbhsv_query[1]:
-            print 'RGB and HSV values do not correspond to same value. Priority given to RGB boxes.'
+        rgb_array = _window.giveme_light_color()
 
         try:
-            MayaSceneLights_applyChanges.change_color([value/255.00 for value in rgbhsv_query[0]],
+            MayaSceneLights_applyChanges.change_color([value/255.00 for value in rgb_array],
                                                       get_selected_widgetitems(),
                                                       _window.keyframecolor_checkbox.isChecked(), 1)
 
@@ -127,13 +124,10 @@ def show():
         Retrieve Shadow Color value in the window's shadow_color attribute, and apply change on the selected lights
         :return: None
         """
-        rgbhsv_query = _window.giveme_shadow_color()
-
-        if not rgbhsv_query[1]:
-            print 'RGB and HSV values do not correspond to same value. Priority given to RGB boxes.'
+        rgb_array = _window.giveme_shadow_color()
 
         try:
-            MayaSceneLights_applyChanges.change_color([value/256.00 for value in rgbhsv_query[0]],
+            MayaSceneLights_applyChanges.change_color([value/255.00 for value in rgb_array],
                                                       get_selected_widgetitems(),
                                                       _window.keyframecolor_checkbox.isChecked(), 2)
 

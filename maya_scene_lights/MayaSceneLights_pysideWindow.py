@@ -50,10 +50,6 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         # Determines whether 'Render Layer Only' Mode is on or not
         self.render_layer_only = False
 
-        # RGB color of the current color shown in the light and shadow color; starts as white and black
-        self.color_light = QtGui.QColor(255, 255, 255)
-        self.color_shadow = QtGui.QColor(0, 0, 0)
-
         # Create and set the container's central widget on the window
         main_container = QtGui.QWidget(self)
         self.setCentralWidget(main_container)
@@ -119,14 +115,12 @@ class LightInterfaceWindow(QtGui.QMainWindow):
             Return a new QLabel
             :param text: Text that will be contained by the label
             :param size: Size of the label's text
-            :param color: Color of the label's text
             :param bold: Boolean that tells whether to bold the label or not
             :return: QLabel
             """
             label = QtGui.QLabel(text)
             label.setStyleSheet('color:#EEEEEE;')
             label.setAlignment(QtCore.Qt.AlignCenter)
-            label.setFixedHeight(20)
     
             font = QtGui.QFont()
             font.setPointSize(size)
@@ -240,8 +234,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         gs_layout = QtGui.QHBoxLayout()
         bv_layout = QtGui.QHBoxLayout()
 
-        self.color_frame = colorFrame(main_container, 1, self.color_light.red(),
-                                      self.color_light.green(), self.color_light.blue())
+        self.color_frame = colorFrame(main_container, 1, 255, 255, 255)
 
         r_label = new_label('R:', 9)
         g_label = new_label('G:', 9)
@@ -275,8 +268,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         gsshadow_layout = QtGui.QHBoxLayout()
         bvshadow_layout = QtGui.QHBoxLayout()
 
-        self.colorshadow_frame = colorFrame(main_container, 2, self.color_shadow.red(),
-                                            self.color_shadow.green(), self.color_shadow.blue())
+        self.colorshadow_frame = colorFrame(main_container, 2, 0, 0, 0)
 
         rshadow_label = new_label('R:', 9)
         gshadow_label = new_label('G:', 9)
@@ -547,8 +539,8 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         add_space(main_layout, 10, 0)
 
         # Fill the color textboxes with the default colors
-        self.update_lightcolor_boxes(self.color_light)
-        self.update_shadowcolor_boxes(self.color_shadow)
+        self.update_lightcolor_boxes(self.color_frame.color)
+        self.update_shadowcolor_boxes(self.colorshadow_frame.color)
 
         main_container.setLayout(main_layout)
         self.setWindowTitle('Light Interface')
@@ -563,47 +555,25 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         """
         # Either a light color (1) or a shadow color has been selected
         if where is 1:
-            self.color_light = color
-            self.update_lightcolor_boxes(self.color_light)
+            self.update_lightcolor_boxes(color)
         else:
-            self.color_shadow = color
-            self.update_shadowcolor_boxes(self.color_shadow)
+            self.update_shadowcolor_boxes(color)
 
     def giveme_light_color(self):
         """
-        Retrieves the current light RGB color value in the window; compare to HSV value to tell if they're different
-        :return: Array with RGB values of self.color_light and a comparison between RGB and HSV values
+        Retrieves the current light RGB color value in the window's Color Frame
+        :return: Array with RGB values of self.color_frame.color
         """
-        try:
-            rgb_value = QtGui.QColor(int(self.r_textbox.text()), int(self.g_textbox.text()),
-                                  int(self.b_textbox.text()))
 
-            hsv_value = QtGui.QColor()
-            hsv_value.setHsv(int(self.h_textbox.text()), int(self.s_textbox.text()),
-                            int(self.v_textbox.text()))
-
-            return [[rgb_value.red(), rgb_value.green(), rgb_value.blue()], rgb_value == hsv_value]
-
-        except:
-            raise ValueError('Only numerical values should be inside the Color textboxes')
+        return [self.color_frame.color.red(), self.color_frame.color.green(), self.color_frame.color.blue()]
 
     def giveme_shadow_color(self):
         """
-        Retrieves the current shadow RGB color value in the window; compare to HSV value to tell if they're different
-        :return: Array with RGB values of self.shadow_color and a comparison between RGB and HSV values
+        Retrieves the current shadow RGB color value in the window
+        :return: Array with RGB values of self.colorshadow_frame.color
         """
-        try:
-            rgb_value = QtGui.QColor(int(self.rshadow_textbox.text()), int(self.gshadow_textbox.text()),
-                                     int(self.bshadow_textbox.text()))
 
-            hsv_value = QtGui.QColor()
-            hsv_value.setHsv(int(self.hshadow_textbox.text()), int(self.sshadow_textbox.text()),
-                             int(self.vshadow_textbox.text()))
-
-            return [[rgb_value.red(), rgb_value.green(), rgb_value.blue()], rgb_value == hsv_value]
-
-        except:
-            raise ValueError('Only numerical values should be inside the Shadow Color textboxes')
+        return [self.colorshadow_frame.color.red(), self.colorshadow_frame.color.green(), self.colorshadow_frame.color.blue()]
 
     def populate_itemlist(self, lights_array, selected_array):
         """
@@ -612,6 +582,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         :param selected_array: Array of selected items in the scene
         :return:None
         """
+        # Clear the current list clean
         for item in self.lightsArray:
             list_items = self.widgetlist.findItems(str(item), QtCore.Qt.MatchExactly)
             self.widgetlist.removeItemWidget(list_items[0])
@@ -642,15 +613,15 @@ class LightInterfaceWindow(QtGui.QMainWindow):
 
     def receive_mayacolor(self, rgb_float_array):
         """
-        Receives a Float Array from a Light nodetype's getColor method to update the window's color_light
+        Receives a Float Array from a Light nodetype's getColor method to update the window's frame's color
         :param rgb_float_array: RGB value of a specific light
         :return: None
         """
-        self.color_light.setRedF(rgb_float_array[0])
-        self.color_light.setGreenF(rgb_float_array[1])
-        self.color_light.setBlueF(rgb_float_array[2])
+        self.color_frame.color.setRedF(rgb_float_array[0])
+        self.color_frame.color.setGreenF(rgb_float_array[1])
+        self.color_frame.color.setBlueF(rgb_float_array[2])
 
-        self.update_lightcolor_boxes(self.color_light)
+        self.update_lightcolor_boxes(self.color_frame.color)
 
     def receive_mayashadow(self, rgb_float_array):
         """
@@ -658,11 +629,11 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         :param rgb_float_array: RGB value of a specific light's shadow color
         :return:
         """
-        self.color_shadow.setRedF(rgb_float_array[0])
-        self.color_shadow.setGreenF(rgb_float_array[1])
-        self.color_shadow.setBlueF(rgb_float_array[2])
+        self.colorshadow_frame.color.setRedF(rgb_float_array[0])
+        self.colorshadow_frame.color.setGreenF(rgb_float_array[1])
+        self.colorshadow_frame.color.setBlueF(rgb_float_array[2])
 
-        self.update_shadowcolor_boxes(self.color_shadow)
+        self.update_shadowcolor_boxes(self.colorshadow_frame.color)
 
     def render_change_trigger(self):
         """
@@ -784,7 +755,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         self.s_textbox.setText(str(color.saturation()))
         self.v_textbox.setText(str(color.value()))
 
-        self.color_frame.update_color(self.color_light)
+        self.color_frame.update_color(self.color_frame.color)
 
     def update_shadowcolor_boxes(self, color):
         """
@@ -802,7 +773,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         self.sshadow_textbox.setText(str(color.saturation()))
         self.vshadow_textbox.setText(str(color.value()))
 
-        self.colorshadow_frame.update_color(self.color_shadow)
+        self.colorshadow_frame.update_color(self.colorshadow_frame.color)
 
     # ============ OVERRIDDEN FUNCTIONS ============
 
@@ -882,8 +853,9 @@ class colorFrame(QtGui.QFrame):
         """
         color = QtGui.QColorDialog.getColor()
 
-        self.update_color(color)
-        self.parent().parent().parent().color_selected(color, self.kind)
+        if color:
+            self.update_color(color)
+            self.parent().parent().parent().color_selected(color, self.kind)
 
 
 class CustomListWidgetItem(QtGui.QWidget):
@@ -932,7 +904,7 @@ def main():
 
     # Change the window's background color
     background_palette = ex.palette()
-    background_palette.setColor(ex.backgroundRole(), QtCore.Qt.darkGray)
+    background_palette.setColor(ex.backgroundRole(), QtGui.QColor(46, 46, 46))
     ex.setPalette(background_palette)
 
     def fill_itemlist():
