@@ -2,7 +2,8 @@ __author__ = 'Carlos Montes'
 
 ''' Creates the main window layout and widgets'''
 
-from PySide import QtGui, QtCore
+from PySide.QtGui import *
+from PySide import QtCore
 import os
 import maya.OpenMaya as OpenMaya
 import maya.OpenMayaUI as OpenMayaUI
@@ -15,10 +16,10 @@ def get_maya_window():
     :return: Returns a wrapped instance of the main Maya window
     """
     pointer = OpenMayaUI.MQtUtil.mainWindow()
-    return shiboken.wrapInstance(long(pointer), QtGui.QWidget)
+    return shiboken.wrapInstance(long(pointer), QWidget)
 
 
-class LightInterfaceWindow(QtGui.QMainWindow):
+class LightInterfaceWindow(QMainWindow):
 
     def __init__(self, parent=None):
         """
@@ -51,7 +52,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         self.render_layer_only = False
 
         # Create and set the container's central widget on the window
-        main_container = QtGui.QWidget(self)
+        main_container = QWidget(self)
         self.setCentralWidget(main_container)
 
         # ===== UTILITY CLOSURES ====
@@ -64,7 +65,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
             :param y: Height of spacer
             :return: None
             """
-            spacer = QtGui.QSpacerItem(x, y)
+            spacer = QSpacerItem(x, y)
             layout.addSpacerItem(spacer)
     
         def add_line(length):
@@ -73,10 +74,10 @@ class LightInterfaceWindow(QtGui.QMainWindow):
             :param length: Length of the line
             :return: QFrame in the form of a line
             """
-            line = QtGui.QFrame()
+            line = QFrame()
             line.setFixedWidth(length)
             line.setGeometry(QtCore.QRect(0, 0, length, 0))
-            line.setFrameShape(QtGui.QFrame.HLine)
+            line.setFrameShape(QFrame.HLine)
             return line
     
         def new_button(text, font_size=None):
@@ -86,11 +87,11 @@ class LightInterfaceWindow(QtGui.QMainWindow):
             :param font_size: Optional Font size of the button's text
             :return: QPushButton
             """
-            button = QtGui.QPushButton('  ' + text + '  ')
+            button = QPushButton('  ' + text + '  ')
             button.setStyleSheet("background-color:#555555; color:#CCCCCC;")
             button.setFixedHeight(25)
             if font_size is not None:
-                font = QtGui.QFont()
+                font = QFont()
                 font.setPointSize(font_size)
                 button.setFont(font)
             return button
@@ -101,11 +102,11 @@ class LightInterfaceWindow(QtGui.QMainWindow):
             :param text: Text that will accompany the checkbox
             :return: QCheckbox
             """
-            checkbox = QtGui.QCheckBox(text)
+            checkbox = QCheckBox(text)
             checkbox.setStyleSheet('color:#EEEEEE;')
     
             cb_palette = checkbox.palette()
-            cb_palette.setColor(QtGui.QPalette.Base, QtCore.Qt.gray)
+            cb_palette.setColor(QPalette.Base, QtCore.Qt.gray)
             checkbox.setPalette(cb_palette)
     
             return checkbox
@@ -118,11 +119,11 @@ class LightInterfaceWindow(QtGui.QMainWindow):
             :param bold: Boolean that tells whether to bold the label or not
             :return: QLabel
             """
-            label = QtGui.QLabel(text)
+            label = QLabel(text)
             label.setStyleSheet('color:#EEEEEE;')
             label.setAlignment(QtCore.Qt.AlignCenter)
     
-            font = QtGui.QFont()
+            font = QFont()
             font.setPointSize(size)
             if bold:
                 font.setBold(bold)
@@ -136,7 +137,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
             :param readonly: Boolean that tells whether to make it non-modifiable
             :return:
             """
-            textbox = QtGui.QLineEdit()
+            textbox = QLineEdit()
             textbox.setFixedSize(size, 20)
             textbox.setStyleSheet('background-color:#6E6E6E; border:none; color:#FFFFFF')
             textbox.setReadOnly(readonly)
@@ -146,16 +147,16 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         # =============== LEFT SIDE OF THE WINDOW ===============
 
         # Search Textbox (and its Focus Policy) and its label, along with its container layout
-        search_layout = QtGui.QHBoxLayout()
+        search_layout = QHBoxLayout()
         search_label = new_label('Search Lights:', 8)
         self.searchlight_tbox = new_line_edit(110)
         self.searchlight_tbox.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         # Widget List that will hold the light names in the scene, and its container layout
-        widgetlist_layout = QtGui.QHBoxLayout()
-        self.widgetlist = QtGui.QListWidget()
+        widgetlist_layout = QHBoxLayout()
+        self.widgetlist = QListWidget()
         self.widgetlist.setMinimumHeight(400)
-        self.widgetlist.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+        self.widgetlist.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.widgetlist.setStyleSheet("""
                                     QListWidget {
                                         background-color:#6E6E6E;
@@ -175,40 +176,40 @@ class LightInterfaceWindow(QtGui.QMainWindow):
                                     )
 
         # Render Layer Only and Update List buttons
-        left_buttons_layout = QtGui.QHBoxLayout()
+        left_buttons_layout = QHBoxLayout()
 
         self.renderlayer_button = new_button('Show Current Render Layer Only', 7)
         self.updatebutton = new_button('Update List', 8)
 
         # Bottom checkbox
-        bottomleft_layout = QtGui.QHBoxLayout()
+        bottomleft_layout = QHBoxLayout()
         self.timeline_listener = new_checkbox('Listen to Timeline Changes')
 
         # ================ RIGHT SIDE OF THE WINDOW =================
 
         # QFrame container of the modifier widgets
-        modifiers_frame = QtGui.QFrame(main_container)
-        modifiers_frame.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Raised)
-        modifiers_frame.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        modifiers_frame = QFrame(main_container)
+        modifiers_frame.setFrameStyle(QFrame.Box | QFrame.Raised)
+        modifiers_frame.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         modifiers_frame.setLineWidth(1)
 
         # Intensity Top Label
-        intensitylabel_layout = QtGui.QHBoxLayout()
+        intensitylabel_layout = QHBoxLayout()
         intensitylabel = new_label('Intensity', 10, True)
         intensitylabel_rightline = add_line(100)
 
         # Main Intensity layout, Current Intensity label, modifying textbox and Operator combo box
-        intensity_layout = QtGui.QVBoxLayout()
+        intensity_layout = QVBoxLayout()
 
-        currentintensity_layout = QtGui.QHBoxLayout()
+        currentintensity_layout = QHBoxLayout()
         intensitycurrent_label = new_label('Current:', 8)
         self.currentintensity_label = new_label('N/A', 11, True)
 
-        setintensity_layout = QtGui.QHBoxLayout()
+        setintensity_layout = QHBoxLayout()
         intensityquantity_label = new_label('Set:', 8)
         self.intensityquantity_textbox = new_line_edit(60)
 
-        self.intensityoperator_combo = QtGui.QComboBox()
+        self.intensityoperator_combo = QComboBox()
         self.intensityoperator_combo.addItem("fixed quantity")
         self.intensityoperator_combo.addItem("+/- increase")
         self.intensityoperator_combo.addItem("* multiply")
@@ -217,22 +218,22 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         self.intensityoperator_combo.setFixedHeight(25)
 
         # Intensity Bottom Widgets
-        intensity_bottomlayout = QtGui.QHBoxLayout()
+        intensity_bottomlayout = QHBoxLayout()
 
         self.keyframeintensity_checkbox = new_checkbox('Set Keyframe')
         self.applyintensity_button = new_button('Apply Intensity')
 
         # Light Color Top Label
-        colorlabel_layout = QtGui.QHBoxLayout()
+        colorlabel_layout = QHBoxLayout()
         colorlabel = new_label('Color', 10, True)
         colorlabel_rightline = add_line(100)
 
         # Light Color Dialog Prompter, RGB/HSV boxes and Frame
-        color_layout = QtGui.QHBoxLayout()
-        colorTextboxes_layout = QtGui.QVBoxLayout()
-        rh_layout = QtGui.QHBoxLayout()
-        gs_layout = QtGui.QHBoxLayout()
-        bv_layout = QtGui.QHBoxLayout()
+        color_layout = QHBoxLayout()
+        colorTextboxes_layout = QVBoxLayout()
+        rh_layout = QHBoxLayout()
+        gs_layout = QHBoxLayout()
+        bv_layout = QHBoxLayout()
 
         self.color_frame = colorFrame(main_container, 1, 255, 255, 255)
 
@@ -251,22 +252,22 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         self.v_textbox = new_line_edit(40, True)
 
         # Light Color Bottom
-        lightcolor_bottomlayout = QtGui.QHBoxLayout()
+        lightcolor_bottomlayout = QHBoxLayout()
 
         self.keyframecolor_checkbox = new_checkbox('Set Keyframe')
         self.applycolor_button = new_button('Apply Color')
 
         # Shadow Color Top Label
-        colorshadowlabel_layout = QtGui.QHBoxLayout()
+        colorshadowlabel_layout = QHBoxLayout()
         colorshadowlabel = new_label('Shadow Color', 10, True)
         colorshadowlabel_rightline = add_line(100)
 
         # Shadow Color Dialog Prompter, RGB/HSV boxes and Frame
-        colorshadow_layout = QtGui.QHBoxLayout()
-        colorshadowTextboxes_layout = QtGui.QVBoxLayout()
-        rhshadow_layout = QtGui.QHBoxLayout()
-        gsshadow_layout = QtGui.QHBoxLayout()
-        bvshadow_layout = QtGui.QHBoxLayout()
+        colorshadow_layout = QHBoxLayout()
+        colorshadowTextboxes_layout = QVBoxLayout()
+        rhshadow_layout = QHBoxLayout()
+        gsshadow_layout = QHBoxLayout()
+        bvshadow_layout = QHBoxLayout()
 
         self.colorshadow_frame = colorFrame(main_container, 2, 0, 0, 0)
 
@@ -285,13 +286,13 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         self.vshadow_textbox = new_line_edit(40, True)
 
         # Shadow Color Bottom
-        shadowcolor_bottomlayout = QtGui.QHBoxLayout()
+        shadowcolor_bottomlayout = QHBoxLayout()
 
         self.keyframeshadow_checkbox = new_checkbox('Set Keyframe')
         self.applyshadow_button = new_button('Apply Shadow')
 
         # Render Layer Buttons
-        renderlayer_layout = QtGui.QHBoxLayout()
+        renderlayer_layout = QHBoxLayout()
 
         self.renderlayer_add = new_button('Add to Render Layer', 7)
         self.renderlayer_remove = new_button('Remove from Render Layer', 7)
@@ -303,13 +304,13 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         # ============ LAYOUTS ============
 
         # ------ Vertical box layout for the left side ------
-        vertical_layout_left = QtGui.QVBoxLayout()
+        vertical_layout_left = QVBoxLayout()
 
         # ------ Vertical box layout for the right side ------
-        vertical_layout_right = QtGui.QVBoxLayout()
+        vertical_layout_right = QVBoxLayout()
 
         # ------ Modifiers Layout and Widgets ------
-        modifiers_layout = QtGui.QVBoxLayout()
+        modifiers_layout = QVBoxLayout()
 
         # Search box Layout
         search_layout.addStretch(1)
@@ -531,7 +532,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         vertical_layout_right.setAlignment(QtCore.Qt.AlignTop)
 
         # Main layout (Horizontal) for the whole window
-        main_layout = QtGui.QHBoxLayout()
+        main_layout = QHBoxLayout()
         add_space(main_layout, 10, 0)
         main_layout.addLayout(vertical_layout_left)
         add_space(main_layout, 20, 0)
@@ -595,7 +596,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
             self.lightsArray.append(str(item))
 
             # Create a ListWidgetItem with the light's name. This text will be hidden with the widgetlist's Stylesheet
-            list_item = QtGui.QListWidgetItem(self.lightsArray[counter])
+            list_item = QListWidgetItem(self.lightsArray[counter])
             list_item.setSizeHint(QtCore.QSize(0, 50))
 
             # Create a Custom Widget with the light's name and an icon according to its type and render layer presence
@@ -803,7 +804,7 @@ class LightInterfaceWindow(QtGui.QMainWindow):
         self.search_light(self.searchlight_tbox.text())
 
 
-class colorFrame(QtGui.QFrame):
+class colorFrame(QFrame):
     def __init__(self, parent, number, red, green, blue):
         """
         Create a customizable QFrame that reacts to a click by opening a QColorDialog
@@ -817,15 +818,15 @@ class colorFrame(QtGui.QFrame):
         super(colorFrame, self).__init__(parent)
 
         self.kind = number
-        self.hexadecimal = QtGui.QLabel('', self)
-        self.color = QtGui.QColor(red, green, blue)
+        self.hexadecimal = QLabel('', self)
+        self.color = QColor(red, green, blue)
         self.update_color(self.color)
 
-        vertical_layout = QtGui.QVBoxLayout()
+        vertical_layout = QVBoxLayout()
         vertical_layout.addWidget(self.hexadecimal)
         vertical_layout.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.setFrameStyle(QtGui.QFrame.Panel | QtGui.QFrame.Sunken)
+        self.setFrameStyle(QFrame.Panel | QFrame.Sunken)
         self.setLineWidth(1)
         self.setFixedSize(80, 80)
         self.setLayout(vertical_layout)
@@ -851,39 +852,39 @@ class colorFrame(QtGui.QFrame):
         :param event: Unused event parameter
         :return: None
         """
-        color = QtGui.QColorDialog.getColor()
+        color = QColorDialog.getColor()
 
         if color:
             self.update_color(color)
             self.parent().parent().parent().color_selected(color, self.kind)
 
 
-class CustomListWidgetItem(QtGui.QWidget):
+class CustomListWidgetItem(QWidget):
     def __init__(self, parent, name, icon_path):
         """
         Creates a new Custom Widget that displays a light's icon according to its nodeType, and its name
         """
         super(CustomListWidgetItem, self).__init__(parent)
 
-        main_layout = QtGui.QHBoxLayout()
+        main_layout = QHBoxLayout()
         self.setFixedHeight(50)
 
-        light_icon = QtGui.QLabel()
+        light_icon = QLabel()
         light_icon.setFixedSize(38, 38)
-        pixmap = QtGui.QImage(icon_path)
+        pixmap = QImage(icon_path)
         pixmap.load(icon_path)
-        light_icon.setPixmap(QtGui.QPixmap.fromImage(pixmap))
+        light_icon.setPixmap(QPixmap.fromImage(pixmap))
 
-        light_name = QtGui.QLabel(name)
-        font = QtGui.QFont()
+        light_name = QLabel(name)
+        font = QFont()
         font.setPointSize(10)
         light_name.setFont(font)
         light_name.setStyleSheet('color:#FFFFFF')
 
-        spacer = QtGui.QSpacerItem(10, 0)
+        spacer = QSpacerItem(10, 0)
         main_layout.addSpacerItem(spacer)
         main_layout.addWidget(light_icon)
-        spacer = QtGui.QSpacerItem(10, 0)
+        spacer = QSpacerItem(10, 0)
         main_layout.addSpacerItem(spacer)
         main_layout.addWidget(light_name)
         main_layout.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
@@ -898,13 +899,13 @@ def main():
     """
     import sys
 
-    app = QtGui.QApplication(sys.argv)
+    app = QApplication(sys.argv)
 
     ex = LightInterfaceWindow()
 
     # Change the window's background color
     background_palette = ex.palette()
-    background_palette.setColor(ex.backgroundRole(), QtGui.QColor(46, 46, 46))
+    background_palette.setColor(ex.backgroundRole(), QColor(46, 46, 46))
     ex.setPalette(background_palette)
 
     def fill_itemlist():
