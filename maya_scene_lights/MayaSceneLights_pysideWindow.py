@@ -33,16 +33,16 @@ class LightInterfaceWindow(QMainWindow):
         # Array that holds the names of lights in the scene
         self.lightsArray = []
 
-        # Temporary array that holds the names of elements in the current render layer
+        # List that holds the names of elements in the current render layer
         self.render_layer_array = []
 
         # Array that holds the ids of future Maya's MEventMessage callbacks
         self.idCallback = []
 
-        # Saves the name of the latest selected light. Useful for Timeline Listener
+        # Keeps name of the latest selected light. Useful for Timeline Listener
         self.latest_light_selected = None
 
-        # Saves the name of the current render layer
+        # Keeps the name of the current render layer
         self.current_render_layer = None
 
         # For file location of icons
@@ -55,7 +55,7 @@ class LightInterfaceWindow(QMainWindow):
         main_container = QWidget(self)
         self.setCentralWidget(main_container)
 
-        # ===== UTILITY CLOSURES ====
+        # ===== UTILITY FUNCTIONS ====
 
         def add_space(layout, x, y):
             """
@@ -146,13 +146,13 @@ class LightInterfaceWindow(QMainWindow):
 
         # =============== LEFT SIDE OF THE WINDOW ===============
 
-        # Search Textbox (and its Focus Policy) and its label, along with its container layout
+        # Search Textbox (with Focus Policy) and its label, with its layout
         search_layout = QHBoxLayout()
         search_label = new_label('Search Lights:', 8)
         self.searchlight_tbox = new_line_edit(110)
         self.searchlight_tbox.setFocusPolicy(QtCore.Qt.StrongFocus)
 
-        # Widget List that will hold the light names in the scene, and its container layout
+        # Widget List that will hold the light names, and its layout
         widgetlist_layout = QHBoxLayout()
         self.widgetlist = QListWidget()
         self.widgetlist.setMinimumHeight(400)
@@ -178,7 +178,8 @@ class LightInterfaceWindow(QMainWindow):
         # Render Layer Only and Update List buttons
         left_buttons_layout = QHBoxLayout()
 
-        self.renderlayer_button = new_button('Show Current Render Layer Only', 7)
+        self.renderlayer_button = new_button('Show Current Render Layer Only',
+                                             7)
         self.updatebutton = new_button('Update List', 8)
 
         # Bottom checkbox
@@ -198,10 +199,10 @@ class LightInterfaceWindow(QMainWindow):
         intensitylabel = new_label('Intensity', 10, True)
         intensitylabel_rightline = add_line(100)
 
-        # Main Intensity layout, Current Intensity label, modifying textbox and Operator combo box
+        # Main Intensity layout and its widgets
         intensity_layout = QVBoxLayout()
 
-        currentintensity_layout = QHBoxLayout()
+        currentintensity_ly = QHBoxLayout()
         intensitycurrent_label = new_label('Current:', 8)
         self.currentintensity_label = new_label('N/A', 11, True)
 
@@ -299,7 +300,9 @@ class LightInterfaceWindow(QMainWindow):
 
         # ============ CONNECTIONS, SIGNALS AND CALLBACKS ============
 
-        self.connect(self.searchlight_tbox, QtCore.SIGNAL('keyReleaseEvent()'), self.search_light)
+        # Connect the 'Search Light' textbox to the search_light() method
+        self.connect(self.searchlight_tbox,
+                     QtCore.SIGNAL('keyReleaseEvent()'), self.search_light)
 
         # ============ LAYOUTS ============
 
@@ -353,12 +356,12 @@ class LightInterfaceWindow(QMainWindow):
         add_space(modifiers_layout, 0, 5)
 
         # Intensity modifiers
-        add_space(currentintensity_layout, 20, 0)
-        currentintensity_layout.addWidget(intensitycurrent_label)
-        currentintensity_layout.addStretch(1)
-        currentintensity_layout.addWidget(self.currentintensity_label)
-        add_space(currentintensity_layout, 20, 0)
-        currentintensity_layout.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        add_space(currentintensity_ly, 20, 0)
+        currentintensity_ly.addWidget(intensitycurrent_label)
+        currentintensity_ly.addStretch(1)
+        currentintensity_ly.addWidget(self.currentintensity_label)
+        add_space(currentintensity_ly, 20, 0)
+        currentintensity_ly.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
 
         add_space(setintensity_layout, 20, 0)
         setintensity_layout.addWidget(intensityquantity_label)
@@ -369,7 +372,7 @@ class LightInterfaceWindow(QMainWindow):
         add_space(setintensity_layout, 20, 0)
         setintensity_layout.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
 
-        intensity_layout.addLayout(currentintensity_layout)
+        intensity_layout.addLayout(currentintensity_ly)
         add_space(intensity_layout, 0, 10)
         intensity_layout.addLayout(setintensity_layout)
         add_space(intensity_layout, 0, 10)
@@ -512,7 +515,8 @@ class LightInterfaceWindow(QMainWindow):
         modifiers_layout.addLayout(shadowcolor_bottomlayout)
         add_space(modifiers_layout, 0, 10)
 
-        # Finish modifiers' layout by setting a Center Alignment and adding it to the modifier frame
+        # Finish modifiers' layout by setting a Center Alignment
+        # and adding it to the modifier frame
         modifiers_frame.setLayout(modifiers_layout)
         modifiers_layout.setAlignment(QtCore.Qt.AlignCenter)
 
@@ -549,7 +553,8 @@ class LightInterfaceWindow(QMainWindow):
 
     def color_selected(self, color, where):
         """
-        A light color or shadow color has been selected; change the content of the corresponding widgets
+        A light color or shadow color has been selected;
+        change the content of the corresponding widgets.
         :param color: Hexadecimal value of the selected color
         :param where: 1 for color light, 2 for shadow color
         :return: None
@@ -566,7 +571,8 @@ class LightInterfaceWindow(QMainWindow):
         :return: Array with RGB values of self.color_frame.color
         """
 
-        return [self.color_frame.color.red(), self.color_frame.color.green(), self.color_frame.color.blue()]
+        return [self.color_frame.color.red(), self.color_frame.color.green(),
+                self.color_frame.color.blue()]
 
     def giveme_shadow_color(self):
         """
@@ -574,7 +580,9 @@ class LightInterfaceWindow(QMainWindow):
         :return: Array with RGB values of self.colorshadow_frame.color
         """
 
-        return [self.colorshadow_frame.color.red(), self.colorshadow_frame.color.green(), self.colorshadow_frame.color.blue()]
+        return [self.colorshadow_frame.color.red(),
+                self.colorshadow_frame.color.green(),
+                self.colorshadow_frame.color.blue()]
 
     def populate_itemlist(self, lights_array, selected_array):
         """
@@ -585,7 +593,8 @@ class LightInterfaceWindow(QMainWindow):
         """
         # Clear the current list clean
         for item in self.lightsArray:
-            list_items = self.widgetlist.findItems(str(item), QtCore.Qt.MatchExactly)
+            list_items = self.widgetlist.findItems(str(item),
+                                                   QtCore.Qt.MatchExactly)
             self.widgetlist.removeItemWidget(list_items[0])
 
         self.lightsArray = []
@@ -595,13 +604,17 @@ class LightInterfaceWindow(QMainWindow):
         for item, light_type in lights_array:
             self.lightsArray.append(str(item))
 
-            # Create a ListWidgetItem with the light's name. This text will be hidden with the widgetlist's Stylesheet
+            # Create a ListWidgetItem with the light's name.
+            # This text will be hidden with the widgetlist's Stylesheet
             list_item = QListWidgetItem(self.lightsArray[counter])
             list_item.setSizeHint(QtCore.QSize(0, 50))
 
-            # Create a Custom Widget with the light's name and an icon according to its type and render layer presence
-            custom_widget = CustomListWidgetItem(self.widgetlist, self.lightsArray[counter],
-                                                 os.path.join(self.filepath, 'icon_' + light_type + '.png'))
+            # Create a Custom Widget with the light's name
+            # and an icon according to its type and render layer presence
+            custom_widget = CustomListWidgetItem(self.widgetlist,
+                                                 self.lightsArray[counter],
+                                                 os.path.join(self.filepath,
+                                                 'icon_' + light_type + '.png'))
 
             self.widgetlist.addItem(list_item)
             self.widgetlist.setItemWidget(list_item, custom_widget)
@@ -614,7 +627,8 @@ class LightInterfaceWindow(QMainWindow):
 
     def receive_mayacolor(self, rgb_float_array):
         """
-        Receives a Float Array from a Light nodetype's getColor method to update the window's frame's color
+        Receives a Float Array from a Light nodetype's getColor method
+        to update the window's frame's color.
         :param rgb_float_array: RGB value of a specific light
         :return: None
         """
@@ -628,7 +642,7 @@ class LightInterfaceWindow(QMainWindow):
         """
         Receives a Float Array from a Light nodetype's getShadowColor method
         :param rgb_float_array: RGB value of a specific light's shadow color
-        :return:
+        :return: None
         """
         self.colorshadow_frame.color.setRedF(rgb_float_array[0])
         self.colorshadow_frame.color.setGreenF(rgb_float_array[1])
@@ -638,7 +652,8 @@ class LightInterfaceWindow(QMainWindow):
 
     def render_change_trigger(self):
         """
-        A new Render Layer has been selected; check if this is the defaultRenderLayer and reset Render Layer Only mode
+        A new Render Layer has been selected; check if this is the
+        defaultRenderLayer and reset Render Layer Only mode.
         :return: None
         """
         if self.current_render_layer == 'defaultRenderLayer':
@@ -654,11 +669,12 @@ class LightInterfaceWindow(QMainWindow):
 
     def render_layer_off(self):
         """
-        Render Layer Mode has been deactivated; show all lights and reset everything related to render layers
+        Render Layer Mode has been deactivated.
         :return: None
         """
         self.render_layer_array = []
         self.render_layer_only = False
+        # Change the Render Layer button text
         self.renderlayer_button.setText('Show Current Render Layer Only')
 
         # Go through each list item and unhide it
@@ -667,12 +683,13 @@ class LightInterfaceWindow(QMainWindow):
 
     def render_layer_on(self, layer_elements):
         """
-        Render Layer Mode has been activated
+        Render Layer Mode has been activated.
         :param layer_elements: Array of elements in the current Render Layer
         :return: None
         """
         self.render_layer_array = layer_elements
         self.render_layer_only = True
+        # Change the Render Layer button text
         self.renderlayer_button.setText('Show All Lights')
 
         # Go through each list item and hide or unhide it
@@ -690,7 +707,8 @@ class LightInterfaceWindow(QMainWindow):
         :param letters: String of characters that the user has typed
         :return: None
         """
-        # If Render Layer Only is on... show those lights that are in the window's render_layer_array and match letters
+        # If Render Layer Only is on, show those lights that are in the window's
+        # render_layer_array and that match the 'Search Light' textbox content
         if self.render_layer_only:
             # Go through each list item and hide it or unhide it
             for i in range(self.widgetlist.count()):
@@ -732,7 +750,7 @@ class LightInterfaceWindow(QMainWindow):
     def update_intensity_label(self, quantity=None):
         """
         Updates the current intensity label's content
-        :param quantity: Intensity quantity of a specific light. If None, N/A will be displayed
+        :param quantity: Intensity quantity of a specific light.
         :return: None
         """
         if quantity is None:
@@ -742,9 +760,10 @@ class LightInterfaceWindow(QMainWindow):
 
     def update_lightcolor_boxes(self, color):
         """
-        Fill the light color lineEdits with a certain string in its respective attributes, change color frame
+        Fill the light color text widgets with a certain string in
+        its respective attributes, change color frame
         :param color: QColor instance
-        :return:
+        :return: None
         """
         self.r_textbox.setText(str(color.red()))
         self.g_textbox.setText(str(color.green()))
@@ -760,7 +779,8 @@ class LightInterfaceWindow(QMainWindow):
 
     def update_shadowcolor_boxes(self, color):
         """
-        Fill the shadow color boxes with a certain string in its respective attributes, change shadow color frame
+        Fill the shadow color boxes with a certain string in
+        its respective attributes, change shadow color frame.
         :param color: QColor instance
         :return: None
         """
@@ -781,17 +801,17 @@ class LightInterfaceWindow(QMainWindow):
     # When the window is closed, kill the MEvent Message Callback
     def closeEvent(self, event):
         """
-        Remove OpenMaya callbacks when the window is closed
+        Remove Maya API callbacks when the window is closed.
         :param event: Unused event parameter
         :return: None
         """
-        for id in self.idCallback:
+        for idc in self.idCallback:
             try:
-                OpenMaya.MEventMessage.removeCallback(id)
+                OpenMaya.MEventMessage.removeCallback(idc)
                 print 'Callback removed'
 
             except:
-                print 'Could not locate such a thing as a Maya API Callback. Closing anyway.'
+                print "No Maya API Callback {} to close".format(idc)
 
         event.accept()
 
@@ -805,9 +825,13 @@ class LightInterfaceWindow(QMainWindow):
 
 
 class colorFrame(QFrame):
+    """
+    QFrame subclass that opens a 'Choose Color' Dialog when being clicked on.
+    """
+
     def __init__(self, parent, number, red, green, blue):
         """
-        Create a customizable QFrame that reacts to a click by opening a QColorDialog
+        Initialize a customizable QFrame.
         :param parent: Widget parent of this frame
         :param number: 1 if it's Color Light, 2 if it's Shadow Color
         :param red: Red value to set on a new QColor
@@ -840,6 +864,7 @@ class colorFrame(QFrame):
         self.color = color
         self.setStyleSheet("background-color: %s" % self.color.name())
 
+        # Modify the BW color of the hex string according to black color value
         if self.color.black() < 128:
             self.hexadecimal.setStyleSheet('color:#000000')
         else:
@@ -860,10 +885,16 @@ class colorFrame(QFrame):
 
 
 class CustomListWidgetItem(QWidget):
+    """
+    Widget that shows a light's name and icon according to its nodeType.
+    """
     def __init__(self, parent, name, icon_path):
         """
-        Creates a new Custom Widget that displays a light's icon according to its nodeType, and its name
+        :param parent: Widget item that will contain this widget
+        :param name: Name of the light
+        :param icon_path: Filepath of the image
         """
+
         super(CustomListWidgetItem, self).__init__(parent)
 
         main_layout = QHBoxLayout()
